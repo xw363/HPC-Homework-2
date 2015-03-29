@@ -1,4 +1,5 @@
-/* Parallel sample sort
+/*
+ * Parallel sample sort
  */
 #include <stdio.h>
 #include <unistd.h>
@@ -21,12 +22,15 @@ static int compare(const void *a, const void *b)
 
 int main( int argc, char *argv[])
 {
-  int rank;
-  int i, N;
+  int rank, P, root = 0, tag = 1;
+  int i, N, S;
   int *vec;
+  int *local_splitter;
+  MPI_Status status;
 
   MPI_Init(&argc, &argv);
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  MPI_Comm_size(MPI_COMM_WORLD, &P);
 
   /* Number of random numbers per processor (this should be increased
    * for actual tests or could be made a passed in through the command line */
@@ -46,11 +50,37 @@ int main( int argc, char *argv[])
 
   /* randomly sample s entries from vector or select local splitters,
    * i.e., every N/P-th entry of the sorted vector */
+  S = 9;
+  if (rank == root) {
+    local_splitter = malloc(S * P * sizeof(int));
+  }
+  else {
+    local_splitter = malloc(S * sizeof(int));
+  }
+  for (i = 0; i < S; ++i) {
+    local_splitter[i] = vec[N / S * (i + 1)];
+    printf("rank = %d, s[%d] = %d\n", rank, i, local_splitter[i]);
+  }
 
   /* every processor communicates the selected entries
    * to the root processor */
+  if (rank == root) {
+    for (i = 1; i < P; ++i) {
+      MPI_Recv(&local_splitter[i * S], S, MPI_INT, i, tag, MPI_COMM_WORLD,
+        &status);
+    }
+  }
+  else {
+    MPI_Send(local_splitter, S, MPI_INT, root, tag, MPI_COMM_WORLD);
+  }
 
   /* root processor does a sort, determinates splitters and broadcasts them */
+  if (rank == root) {
+    qsort(local_splitter, S * P, sizeof(int), compare);
+    for (i = 0; i < S * P; ++i)
+      printf("%d,", local_splitter[i]);
+    printf("\n");
+  }
 
   /* every processor uses the obtained splitters to decide to send
    * which integers to whom */
@@ -65,6 +95,7 @@ int main( int argc, char *argv[])
   /* every processor writes its result to a file */
 
   free(vec);
+  free(local_splitter);
   MPI_Finalize();
   return 0;
 }

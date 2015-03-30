@@ -29,7 +29,7 @@ int main( int argc, char *argv[])
   int *local_splitter, *global_splitter;
   int *send_count, *recv_count;
   int *send_displacement, *recv_displacement;
-  int splitter_tag = 1, count_tag = 2;
+  int splitter_tag = 1;
   FILE *fid;
   char filename[25], buf[5];
   struct timeval start, finish;  /* Times that sorting starts and finishes */
@@ -39,7 +39,6 @@ int main( int argc, char *argv[])
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   MPI_Comm_size(MPI_COMM_WORLD, &P);
   MPI_Status status;
-  MPI_Request request[2 * P];
 
   /* Number of random numbers per processor (this should be increased
    * for actual tests or could be made a passed in through the command line */
@@ -121,17 +120,7 @@ int main( int argc, char *argv[])
     send_count[j]++;
   }
 
-  for (i = 0; i < P; ++i) {
-    MPI_Isend(&send_count[i], 1, MPI_INT, i, count_tag, MPI_COMM_WORLD,
-      &request[i]);
-  }
-
-  for (i = 0; i < P; ++i) {
-    MPI_Irecv(&recv_count[i], 1, MPI_INT, i, count_tag, MPI_COMM_WORLD,
-      &request[i + P]);
-  }
-
-  MPI_Waitall(2 * P, request, MPI_STATUSES_IGNORE);
+  MPI_Alltoall(send_count, 1, MPI_INT, recv_count, 1, MPI_INT, MPI_COMM_WORLD);
 
   for (i = 0; i < P; ++i) {
     if (i == 0) {

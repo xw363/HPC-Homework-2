@@ -5,6 +5,6 @@ Homework 2, High Performance Computing (NYU Spring 2015)
 Simply enter `make` in a terminal.
 
 ##Run the samplesort program
-Type `mpirun -np P ./ssort` in a terminal where `p` is the number
+Type `mpirun -np P ./ssort` in a terminal where `P` is the number
 of processor cores to be used.
 

@@ -31,7 +31,7 @@ int main( int argc, char *argv[])
   int *send_displacement, *recv_displacement;
   int splitter_tag = 1, count_tag = 2;
   FILE *fid;
-  char filename[15], buf[5];
+  char filename[25], buf[5];
 
   MPI_Init(&argc, &argv);
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -41,7 +41,11 @@ int main( int argc, char *argv[])
 
   /* Number of random numbers per processor (this should be increased
    * for actual tests or could be made a passed in through the command line */
-  N = 100;
+  if (argc > 1) {
+    N = atoi(argv[1]);
+  } else {
+    N = 100;
+  }
 
   vec = calloc(N, sizeof(int));
   /* seed random number generator differently on every core */
@@ -152,7 +156,7 @@ int main( int argc, char *argv[])
   qsort(vec_recv, N_recv, sizeof(int), compare);
 
   /* every processor writes its result to a file */
-  strcpy(filename, "result_");
+  strcpy(filename, "sorted_vec_");
   sprintf(buf, "%03d", rank);
   strcat(filename, buf);
   strcat(filename, ".txt");

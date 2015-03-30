@@ -141,16 +141,6 @@ int main( int argc, char *argv[])
   N_recv = recv_displacement[P - 1] + recv_count[P - 1];
   vec_recv = malloc(N_recv * sizeof(int));
 
-  for (i = 0; i < P; ++i) {
-    printf("Rank %d -> %d: %d numbers, %d displacement\n",
-      rank, i, send_count[i], send_displacement[i]);
-  }
-  MPI_Barrier(MPI_COMM_WORLD);
-  for (i = 0; i < P; ++i) {
-    printf("Rank %d <- %d: %d numbers, %d displacement\n",
-      rank, i, recv_count[i], recv_displacement[i]);
-  }
-
   /* send and receive: either you use MPI_AlltoallV, or
    * (and that might be easier), use an MPI_Alltoall to share
    * with every processor how many integers it should expect,
@@ -159,15 +149,16 @@ int main( int argc, char *argv[])
     recv_count, recv_displacement, MPI_INT, MPI_COMM_WORLD);
 
   /* local sort */
-  qsort(vec_recv, N, sizeof(int), compare);
+  qsort(vec_recv, N_recv, sizeof(int), compare);
 
   /* every processor writes its result to a file */
-  sprintf(buf, "%3d", rank);
-  strcat("resutl_", buf);
+  strcpy(filename, "result_");
+  sprintf(buf, "%03d", rank);
+  strcat(filename, buf);
   strcat(filename, ".txt");
   fid = fopen(filename, "w");
   for (i = 0; i < N_recv; ++i) {
-    fprintf(fid, "%d", vec_recv[i]);
+    fprintf(fid, "%d ", vec_recv[i]);
   }
   fclose(fid);
 

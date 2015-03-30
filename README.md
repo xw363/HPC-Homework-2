@@ -8,3 +8,5 @@ Simply enter `make` in a terminal.
 Type `mpirun -np P ./ssort` in a terminal where `P` is the number
 of processor cores to be used.
 
+Sorted vector is saved to `sorted_vec_rank.txt`
+

@@ -6,7 +6,7 @@
 #include <mpi.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <sys/time.h>
 
 static int compare(const void *a, const void *b)
 {
@@ -32,6 +32,8 @@ int main( int argc, char *argv[])
   int splitter_tag = 1, count_tag = 2;
   FILE *fid;
   char filename[25], buf[5];
+  struct timeval start, finish;  /* Times that sorting starts and finishes */
+  double total_time;  /* Total communication time */
 
   MPI_Init(&argc, &argv);
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -46,6 +48,9 @@ int main( int argc, char *argv[])
   } else {
     N = 100;
   }
+
+  /* Mark start time */
+  gettimeofday(&start, NULL);
 
   vec = calloc(N, sizeof(int));
   /* seed random number generator differently on every core */
@@ -154,6 +159,12 @@ int main( int argc, char *argv[])
 
   /* local sort */
   qsort(vec_recv, N_recv, sizeof(int), compare);
+
+  /* Mark finish time and get communication time */
+  gettimeofday(&finish, NULL);
+  total_time = finish.tv_sec - start.tv_sec
+               + (finish.tv_usec - start.tv_usec) / 1e6;
+  printf("Rank %d sorting time: %.8f seconds\n", rank, total_time);
 
   /* every processor writes its result to a file */
   strcpy(filename, "sorted_vec_");

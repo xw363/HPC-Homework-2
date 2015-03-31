@@ -10,3 +10,7 @@ of processor cores to be used.
 
 Sorted vector is saved to `sorted_vec_rank.txt`
 
+##Performance of samplesort program on Stampede
+Samplesort\_on\_Stampede.txt is a summary of running the samplesort program
+on Stampede.
+

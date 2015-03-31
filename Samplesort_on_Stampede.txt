@@ -1,0 +1,11 @@
+I ran my ssort program with 64 cores on Stampede for N = 1024, 4096, 16384,
+65536. For each N, the program outputs the time that each rank spent on
+sorting and communication, and below is the summary.
+
+For N = 1024, all ranks took 0.0071 - 0.0078 seconds.
+For N = 4096, most ranks took about 0.0058 - 0.0061 seconds, but a few ranks
+took 0.0072 - 0.0077 second.
+For N = 16384, the running time became much longer. Most ranks took about
+0.010 - 0.011 to finish, and some took 0.016 to 0.018 seconds.
+For N = 65536, most ranks took 0.018 - 0.02 seconds, while a few ranks took
+0.45 - 0.50 seconds.
